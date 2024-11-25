@@ -14,7 +14,7 @@ export class Enquiry {
   @Prop()
   mobile?: string;
 
-  @Prop({ required: true })
+  @Prop()
   email: string;
 
   @Prop()
@@ -26,7 +26,7 @@ export class Enquiry {
   @Prop({ required: true })
   studentLastName: string;
 
-  @Prop()
+  @Prop({required: true})
   grade: string;
 
   @Prop({ type: Date })
@@ -55,6 +55,12 @@ export class Enquiry {
 
   @Prop()
   description?: string;
+  
+  @Prop({required:true})
+  gender?: string;
+
+  @Prop()
+  hostel?: boolean;
 }
 
 export const EnquirySchema = SchemaFactory.createForClass(Enquiry);

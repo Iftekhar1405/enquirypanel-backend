@@ -37,13 +37,15 @@ export class EnquiryService {
 
     async search(searchTerm: string, filters: string,page:number=1,limit:number=20) {
         // Convert the filters string into an array of objects
-        const filterArray = filters && filters !== 'undefined' ? JSON.parse(filters) : [];
+        const filterQuery = filters && filters !== 'undefined' ? JSON.parse(filters) : {};
 
         // Prepare the search query, if there's a searchTerm, search across multiple fields
         const searchQuery = searchTerm
             ? {
                 $or: [
+                    { description: { $regex: searchTerm, $options: 'i' } },
                     { studentFirstName: { $regex: searchTerm, $options: 'i' } },
+                    { studentLastName: { $regex: searchTerm, $options: 'i' } },
                     { grade: { $regex: searchTerm, $options: 'i' } },
                     { guardianName: { $regex: searchTerm, $options: 'i' } },
                     { email: { $regex: searchTerm, $options: 'i' } },
@@ -51,28 +53,39 @@ export class EnquiryService {
                     { mobile: { $regex: searchTerm, $options: 'i' } },
                     { city: { $regex: searchTerm, $options: 'i' } },
                     { state: { $regex: searchTerm, $options: 'i' } },
+                    { zip: { $regex: searchTerm, $options: 'i' } },
                     { country: { $regex: searchTerm, $options: 'i' } },
+                    // { hostel: { $regex: searchTerm, $options: 'i' } },
+                    { gender: { $regex: searchTerm, $options: 'i' } },
+                    { enquirySource: { $regex: searchTerm, $options: 'i' } },
+                    { street: { $regex: searchTerm, $options: 'i' } },
+                    { currentSchool: { $regex: searchTerm, $options: 'i' } },
+                    // { dob: searchTerm },
+                    { twitter: { $regex: searchTerm, $options: 'i' } },
                 ],
             }
             : {};
+            console.log(filterQuery)
+        Object.keys(filterQuery).forEach((item : any)=>{
+            let value = filterQuery[item]
+            console.log(item)
+            if(item != "hostel" && item != 'gender'){//hj
+                filterQuery[item] = {$regex:value,$options:'i'}}
 
-        // Construct the filter query from filterArray (array of objects like { key: "city", value: "New York" })
-        const filterQuery = filterArray.reduce((query, filter) => {
-            if (filter.key && filter.value) {
-                query[filter.key] = { $regex: filter.value, $options: 'i' }; // Regex match for the filter
-            }
-            return query;
-        }, {});
 
-        // Combine the search query and filter query
+        })
+        console.log(filterQuery)
         const finalQuery = {
             ...searchQuery,
-            ...filterQuery, // Apply any filters from the filterArray
+            ...filterQuery, 
         };
 
         const skip = (page - 1)*limit
-        // Perform the search and return the results
-        return this.enquiryModel.find(finalQuery).skip(skip).limit(limit).exec();
+        const data = await this.enquiryModel.find(finalQuery).skip(skip).limit(limit).exec()
+        const count = await this.enquiryModel.countDocuments().exec()
+        const pageCount = Math.ceil(count/limit) 
+        
+        return {data,count,pageCount} ;
     }
 
 }
